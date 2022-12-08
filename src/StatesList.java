@@ -12,7 +12,7 @@ public class StatesList {
         return new ArrayList<>(statesArray);
     }
 
-    public void readFromFile(String file) {
+    public void readFromFile(String file) throws ExceptionStates , FileNotFoundException{
         try (Scanner sc = new Scanner(new FileReader(file))) {
             int cisloRadku = 0;
             String separator = "\t";
@@ -26,7 +26,7 @@ public class StatesList {
                 lineOfFile = sc.nextLine();
                 lineParsed = lineOfFile.split(separator);
 
-                //možné problémy co je třeba očetřit:
+                //možné problémy co je třeba ošetřit:
                 //- daň se nedá převést na číslo (chyba ve znacích)
                 //- daň je náporné číslo
                 //- daňová vyjímka neodpovídá true nebo false
@@ -45,11 +45,12 @@ public class StatesList {
 
                 statesArray.add(new State(lineParsed[0], lineParsed[1], gst, gstR, Boolean.valueOf(lineParsed[4])));
             }
-
-            lineErrors.forEach(tmp -> System.err.println(tmp));
-
-        } catch (FileNotFoundException e) {     //chyba při otevření souboru Scannerem
-            System.err.println(e.getLocalizedMessage());
+            if (lineErrors.size() != 0) {
+                //lineErrors.forEach(tmp -> System.err.println(tmp));
+                throw new ExceptionStates("Při načítání souboru vznikly chyby.",lineErrors);
+            }
+        } catch (FileNotFoundException ex) {     //chyba při otevření souboru Scannerem
+            throw new FileNotFoundException("Chyba čtení souboru. "+ex.getLocalizedMessage());
         }
     }
 
@@ -64,6 +65,7 @@ public class StatesList {
         }
         if ( returnValue.compareTo(BigDecimal.valueOf(0)) < 0) throw new Exception("daň nemůže být záporná");
         return returnValue;
+        //poznámka: možná by šlo používat i Double.parseDouble(items[2].replace(",", "."));
     }
 
     public void writeToFile(String file) {
@@ -72,5 +74,9 @@ public class StatesList {
 
     public void writeOnScreenAll() {
         statesArray.forEach(tmp -> System.out.println(tmp.getState()+" ("+tmp.getSt()+"): "+tmp.getGst()+"%"));
+    }
+
+    public void writeOnScreenSelect() {
+
     }
 }
