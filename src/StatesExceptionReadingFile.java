@@ -1,10 +1,10 @@
 import java.util.List;
 
-public class ExceptionStates extends Exception {
+public class StatesExceptionReadingFile extends Exception {
     private String description;
     private List<String> listOfErrors;
 
-    public ExceptionStates(String description, List<String> listOfErrors) {
+    public StatesExceptionReadingFile(String description, List<String> listOfErrors) {
         super(description);
         this.description = description;
         this.listOfErrors = listOfErrors;

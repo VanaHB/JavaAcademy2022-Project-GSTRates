@@ -6,15 +6,16 @@ import java.util.List;
 import java.util.Scanner;
 
 public class StatesList {
-    private List<State> statesArray = new ArrayList<>();
+    private List<State> statesList = new ArrayList<>();
 
     public List<State> getStatesArray() {
-        return new ArrayList<>(statesArray);
+        return new ArrayList<>(statesList);
     }
 
-    public void readFromFile(String file) throws ExceptionStates , FileNotFoundException{
+    public void readFromFile(String file) throws StatesExceptionReadingFile, FileNotFoundException{
         try (Scanner sc = new Scanner(new FileReader(file))) {
             int cisloRadku = 0;
+            int errorCount;
             String separator = "\t";
             String lineOfFile;
             String[] lineParsed;
@@ -23,60 +24,64 @@ public class StatesList {
             List<String> lineErrors = new ArrayList<>();
             while (sc.hasNextLine()) {
                 cisloRadku++;
+                errorCount = 0;
                 lineOfFile = sc.nextLine();
-                lineParsed = lineOfFile.split(separator);
 
                 //možné problémy co je třeba ošetřit:
+                //- celý řádek má špatný zápis - nesedí bloky oddělné tabelátory
                 //- daň se nedá převést na číslo (chyba ve znacích)
                 //- daň je náporné číslo
                 //- daňová vyjímka neodpovídá true nebo false
-                try {
-                    gst = procesBigdecimal(lineParsed[2]);
-                } catch (Exception ex) {
-                    lineErrors.add("Řádek " + cisloRadku + ": cbyba v gst: "+ex.getLocalizedMessage()+".");
+                if (lineOfFile.matches("^[^\t]+\t{1}[^\t]+\t{1}[^\t]+\t{1}[^\t]+\t{1}[^\t]+$")) {
+                    lineParsed = lineOfFile.split(separator);
+                    try {
+                        gst = procesBigdecimal(lineParsed[2]);
+                    } catch (StatesException ex) {
+                        lineErrors.add("Řádek "+cisloRadku+": chyba v gst: "+ex.getLocalizedMessage()+".");
+                        errorCount++;
+                    }
+                    try {
+                        gstR = procesBigdecimal(lineParsed[3]);
+                    } catch (Exception ex) {
+                        lineErrors.add("Řádek "+cisloRadku+": chyba v gstReduced: "+ex.getLocalizedMessage()+".");
+                        errorCount++;
+                    }
+                    if ((!lineParsed[4].equals("true")) && (!lineParsed[4].equals("false"))) {
+                        lineErrors.add("Řádek "+cisloRadku+": chyba v parametru gtsException: musí se rovnat true nebo false.");
+                        errorCount++;
+                    }
+                    if (errorCount == 0) statesList.add(new State(lineParsed[0], lineParsed[1], gst, gstR, Boolean.valueOf(lineParsed[4])));
+                    //statesList.add(new State(lineParsed[0], lineParsed[1], gst, gstR, Boolean.valueOf(lineParsed[4])));
                 }
-                try {
-                    gstR = procesBigdecimal(lineParsed[3]);
-                } catch (Exception ex) {
-                    lineErrors.add("Řádek " + cisloRadku + ": chyba v gstReduced: "+ex.getLocalizedMessage()+".");
+                else {
+                    lineErrors.add("Řádek "+cisloRadku+": chyba v zápisu řádku.");
                 }
-                if ((!lineParsed[4].equals("true")) && (!lineParsed[4].equals("false")))
-                    lineErrors.add("Řádek " + cisloRadku + ": chyba v parametru gtsException: musí se rovnat true nebo false.");
-
-                statesArray.add(new State(lineParsed[0], lineParsed[1], gst, gstR, Boolean.valueOf(lineParsed[4])));
             }
+
             if (lineErrors.size() != 0) {
-                //lineErrors.forEach(tmp -> System.err.println(tmp));
-                throw new ExceptionStates("Při načítání souboru vznikly chyby.",lineErrors);
+                throw new StatesExceptionReadingFile("Při načítání souboru vznikly chyby:" , lineErrors);
             }
         } catch (FileNotFoundException ex) {     //chyba při otevření souboru Scannerem
-            throw new FileNotFoundException("Chyba čtení souboru. "+ex.getLocalizedMessage());
+            throw ex;
         }
     }
 
     //metoda převede String na BigDecimal; v případě záporného čísla, nebo chyby v řetězci vrátí vyjímku
-    private BigDecimal procesBigdecimal(String bigDecimalString) throws Exception{
+    private BigDecimal procesBigdecimal(String bigDecimalString) throws StatesException{
         bigDecimalString = bigDecimalString.replace("," , ".");
         BigDecimal returnValue;
         try {
             returnValue = new BigDecimal(bigDecimalString);
         } catch (NumberFormatException ex) {
-            throw new Exception("špatný tvar zápisu");
+            //throw new Exception("špatný tvar zápisu");
+            throw new StatesException("špatný tvar zápisu");
         }
-        if ( returnValue.compareTo(BigDecimal.valueOf(0)) < 0) throw new Exception("daň nemůže být záporná");
+        if ( returnValue.compareTo(BigDecimal.valueOf(0)) < 0) throw new StatesException("daň nemůže být záporná");
         return returnValue;
         //poznámka: možná by šlo používat i Double.parseDouble(items[2].replace(",", "."));
     }
 
-    public void writeToFile(String file) {
-        //will be coded later
-    }
-
     public void writeOnScreenAll() {
-        statesArray.forEach(tmp -> System.out.println(tmp.getState()+" ("+tmp.getSt()+"): "+tmp.getGst()+"%"));
-    }
-
-    public void writeOnScreenSelect() {
-
+        statesList.forEach(tmp -> System.out.println(tmp.getState()+" ("+tmp.getSt()+"): "+tmp.getGst()+"%"));
     }
 }
