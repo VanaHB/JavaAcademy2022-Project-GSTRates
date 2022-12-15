@@ -42,6 +42,6 @@ public class Main {
 
         //6 a 7b ÚKOL: výsledný výpis zapiš také do souboru aby reflektoval zadanou sazbu daně.
         //Například pro zadanou sazbu 17 % se vygeneruje soubor vat-over-17.txt a pro sazbu 25 % se vygeneruje soubor vat-over-25.txt.
-        UniversalMethods.writeToFile(Settings.FILEOUT , dividedClass.getOverLimit());
+        UniversalMethods.writeToFile(Settings.FILEOUT , dividedClass.getOverLimit() , dividedClass.getUnderLimit());
     }
 }

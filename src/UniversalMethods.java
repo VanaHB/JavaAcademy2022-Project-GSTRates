@@ -5,12 +5,16 @@ import java.util.Scanner;
 
 public class UniversalMethods {
 
-    public static void writeToFile(String file , List<State> listOfStates) {
+    public static void writeToFile(String file , List<State> listOfStatesOver , List<State> listOfStatesUnder) {
         try(PrintWriter printWritertoFile = new PrintWriter(new BufferedWriter(new FileWriter(file)))) {
             String separator = "\t";
-            listOfStates.forEach(tmpState-> {
-                printWritertoFile.write(tmpState.getSt()+separator+tmpState.getState()+separator+tmpState.getGst()+separator+tmpState.getGstReduced()+separator+tmpState.getGstException()+"\n");
+            listOfStatesOver.forEach(tmpState-> {
+                printWritertoFile.write(tmpState.getState()+" ("+tmpState.getSt()+"): "+tmpState.getGst()+"%\n");
             });
+            printWritertoFile.write("====================\n");
+            printWritertoFile.write("Sazba VAT "+Settings.GSTLIMIT+"% nebo nižší nebo používají speciální sazbu: ");
+            listOfStatesUnder.forEach(tmp -> printWritertoFile.write(tmp.getSt()+" "));
+            printWritertoFile.write("\n");
         } catch (IOException e) {
             System.err.println(e.getLocalizedMessage());
         }
@@ -24,7 +28,7 @@ public class UniversalMethods {
         try {
             scInputBD = new BigDecimal(sc.nextLine());
         } catch (NumberFormatException ex) {
-            System.out.println("Zadaná hodnota není číslo - pro filtrování se použije výchozích "+Settings.GTSLIMITDEFAULT+"%");
+            System.out.println("Zadaná hodnota není číslo (nebo nemá správný formát) - pro filtrování se použije výchozích "+Settings.GTSLIMITDEFAULT+"%");
             scInputBD = Settings.GTSLIMITDEFAULT;
         }
         System.out.println("Bude se filtrovat podle základní daně "+scInputBD+"%");
