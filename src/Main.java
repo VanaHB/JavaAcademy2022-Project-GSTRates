@@ -1,4 +1,5 @@
 import java.io.FileNotFoundException;
+import java.math.BigDecimal;
 import java.util.Collections;
 
 public class Main {
@@ -21,10 +22,10 @@ public class Main {
         listOfStates.writeOnScreenAll();
 
         //7a ÚKOL: Doplň možnost, aby uživatel z klávesnice zadal výši sazby DPH/VAT, podle které se má filtrovat.
-        UniversalMethods.readFromKeyboard();
+        BigDecimal gstLimit = UniversalMethods.readFromKeyboard();
 
         //3. ÚKOL: rozdělení států na dvě skupiny (podle výše základní daně a bez daňové vyjímky)
-        dividedClass.divideThem(listOfStates.getStatesList() , Settings.getGtsLimit() , false);
+        dividedClass.divideThem(listOfStates.getStatesList() , gstLimit , false);
 
         //3b. ÚKOL: výpis skupiny
         System.out.println("\n"+"Výpis vybraných států:");
@@ -37,11 +38,11 @@ public class Main {
         System.out.println("\n"+"Sežazený seznam podle daně:");
         dividedClass.writeOnScreenOverLimit();
         System.out.println("====================");
-        System.out.printf("Sazba VAT "+Settings.getGtsLimit()+"%% nebo nižší nebo používají speciální sazbu: ");
+        System.out.printf("Sazba VAT "+gstLimit+"%% nebo nižší nebo používají speciální sazbu: ");
         dividedClass.getUnderLimit().forEach(tmp -> System.out.printf(tmp.getSt()+" "));
 
         //6 a 7b ÚKOL: výsledný výpis zapiš také do souboru aby reflektoval zadanou sazbu daně.
         //Například pro zadanou sazbu 17 % se vygeneruje soubor vat-over-17.txt a pro sazbu 25 % se vygeneruje soubor vat-over-25.txt.
-        UniversalMethods.writeToFile(Settings.getFileOut() , dividedClass.getOverLimit() , dividedClass.getUnderLimit());
+        UniversalMethods.writeToFile(Settings.getFileOut(gstLimit) , gstLimit , dividedClass.getOverLimit() , dividedClass.getUnderLimit());
     }
 }

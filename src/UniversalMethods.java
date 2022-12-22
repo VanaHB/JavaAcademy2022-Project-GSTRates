@@ -5,13 +5,13 @@ import java.util.Scanner;
 
 public class UniversalMethods {
 
-    public static void writeToFile(String file , List<State> listOfStatesOver , List<State> listOfStatesUnder) {
+    public static void writeToFile(String file , BigDecimal gstLimit , List<State> listOfStatesOver , List<State> listOfStatesUnder) {
         try(PrintWriter printWritertoFile = new PrintWriter(new BufferedWriter(new FileWriter(file)))) {
             listOfStatesOver.forEach(tmpState-> {
                 printWritertoFile.write(tmpState.getState()+Settings.getSeparator()+tmpState.getSt()+Settings.getSeparator()+tmpState.getGst()+"%\n");
             });
             printWritertoFile.write("====================\n");
-            printWritertoFile.write("Sazba VAT "+Settings.gtsLimit +"% nebo nižší nebo používají speciální sazbu: ");
+            printWritertoFile.write("Sazba VAT "+ gstLimit +"% nebo nižší nebo používají speciální sazbu: ");
             listOfStatesUnder.forEach(tmp -> printWritertoFile.write(tmp.getSt()+" "));
             printWritertoFile.write("\n");
         } catch (IOException e) {
@@ -19,7 +19,7 @@ public class UniversalMethods {
         }
     }
 
-    public static void readFromKeyboard() {
+    public static BigDecimal readFromKeyboard() {
         Scanner sc = new Scanner(System.in);
         //BufferedReader br = new BufferedReader(new InputStreamReader(System.in)); //šlo by použít v kombinaci s String scInput = br.readLine();
         BigDecimal scInputBD;
@@ -27,11 +27,10 @@ public class UniversalMethods {
         try {
             scInputBD = new BigDecimal(sc.nextLine());
         } catch (NumberFormatException ex) {
-            System.out.println("Zadaná hodnota není číslo (nebo nemá správný formát) - pro filtrování se použije výchozích "+Settings.gtsLimitDefault +"%");
+            System.out.println("Zadaná hodnota není číslo (nebo nemá správný formát) - pro filtrování se použije výchozích "+Settings.getGtsLimitDefault()+"%");
             scInputBD = Settings.getGtsLimitDefault();
         }
         System.out.println("Bude se filtrovat podle základní daně "+scInputBD+"%");
-        Settings.setGtsLimit(scInputBD);
-        Settings.setFileOut("src\\vat-over-"+scInputBD+".txt");
+        return scInputBD;
     }
 }

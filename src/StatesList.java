@@ -31,10 +31,7 @@ public class StatesList {
                 //- daň se nedá převést na číslo (chyba ve znacích)
                 //- daň je náporné číslo
                 //- daňová vyjímka neodpovídá true nebo false
-                // "+Settings.getSeparator()+"
                 if (lineOfFile.matches("^[^\t]+"+Settings.getSeparator()+"{1}[^\t]+"+Settings.getSeparator()+"{1}[^\t]+"+Settings.getSeparator()+"{1}[^\t]+"+Settings.getSeparator()+"{1}[^\t]+$")) {
-                //System.out.println("^[^\t]+\t{1}[^\t]+\t{1}[^\t]+\t{1}[^\t]+\t{1}[^\t]+$");
-                //if (lineOfFile.matches("^[^\t]+\t{1}[^\t]+\t{1}[^\t]+\t{1}[^\t]+\t{1}[^\t]+$")) {
                         lineParsed = lineOfFile.split(Settings.getSeparator());
                         try {
                             gst = procesBigdecimal(lineParsed[2]);
